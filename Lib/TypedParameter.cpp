@@ -178,59 +178,48 @@ void TypedParameter::error(const string &msg) const {
 }
 
 
-bool TypedParameter::parse_param(const char *curarg) {
+bool TypedParameter::parse_param(const char *curarg, bool output_error) {
   bool found_prefix = false;
 
   for (auto &p : m_prefixes) {
     if (Strings::starts_with(curarg, p)) {
-      if (p == curarg) {
-        // exact match, all is well
-        found_prefix = true;
-        break;
-      }
+			//cout << "parse_param match p: " << p << "; curarg: " << curarg << endl << flush;
 
       if (takes_value()) {
         // The only character allowed after is an equals sign
         assert(strlen(curarg) > p.size());
-        if (curarg[p.size()] != '=') continue;
-      }
+        if (curarg[p.size()] == '=') {
+      		found_prefix = true;
+				}
+      } else if (p == curarg)  {  // If no parameter, match must be exact
+     		found_prefix = true;
+			}
 
-      found_prefix = true;
-      break;
+			if (found_prefix) break;
     }
   }
 
   if (!found_prefix) {
+		//cout << "Did not find prefix" << endl;
     return false;
   }
 
   string value = get_param(curarg);
 
   if (takes_value()) {
-    if (value.empty()) {
+    if (value.empty() && output_error) {
       error("takes a value, none specified.");
     } else {
       // Disallow whitespace after '='
-      if (std::isspace(static_cast<unsigned char>(value[0]))) {
+      if (std::isspace(static_cast<unsigned char>(value[0])) && output_error) {
         error(" has unexpected whitespace after '='.");
       }
     }
   } else {
-    if (Strings::contains(curarg, "=") || !value.empty()) {
+    if ((Strings::contains(curarg, "=") || !value.empty()) && output_error) {
      error("has value specified, shouldn't have one.");
     }
   }
-
-/*
-  // All param's except type NONE should have a value specified
-    if (value.empty()) {
-      if (def_param.has_default()) {
-        return true;  // All is well, we have a default
-      } else {
-        throw Exception(msg + " no value present and default not specified.");
-      }
-    }
-*/
 
   return parse_param_internal(value);
 }

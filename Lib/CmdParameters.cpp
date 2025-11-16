@@ -30,10 +30,52 @@ string pad(unsigned width, std::string const &str = "") {
 
 
 bool process_option(List &parameters, char const *curarg) {
+	//cout << "curarg: " << curarg << endl << flush;
+
   for (auto &item: parameters) {
     TypedParameter &param = *item;
-    if (param.parse_param(curarg)) return true;
+    if (param.parse_param(curarg)) {
+			//c.out << "Passed! curarg: " << curarg << endl << flush;
+			return true;
+		}
   }
+
+	// curargs might be a combined sequence of single-letter param's
+	// Test them separately, but they ALL should succeed.
+	//
+	// Technically, the final param could take a value. We don't
+	// handle this right now.
+	if (curarg[0] == '-' && strlen(curarg) > 2) {
+
+		int count = 0; // ALL values should match
+
+		for (int i = 1; i < strlen(curarg); ++i) {
+			if (curarg[i] == '=') return false;  // Don't bother with final param for now
+
+			string arg("-");
+			char c = curarg[i];
+			arg += c;
+    
+			//cout << "process_option handling arg: " << arg << "." << endl;
+
+			bool found_it = false;
+	  	for (auto &item: parameters) {
+		    TypedParameter &param = *item;
+		    if (param.parse_param(arg.c_str(), false)) {
+					found_it = true;
+					count++;
+					break;
+				}
+		  }
+
+			if (!found_it) {
+				return false;
+			}
+
+		}
+
+		return count == strlen(curarg) - 1;  // all single-char options pass here
+	}
 
   return false;
 }
@@ -263,7 +305,7 @@ void CmdParameters::process_arg(char const *curarg) {
   if (handle_action(curarg, &errors)) return;
   if (handle_action_option(curarg)) return;
 
-  // It's not one an option or an action, so it must be unnamed input
+  // It's not an option or an action, so it must be unnamed input
   // NOTE: this implementation checks UNNAMED on global options only
   if (!m_parameters.process_unnamed(curarg)) {
     errors << "  Unknown parameter '" << curarg << "', or too many unnamed parameters on command line.\n";
@@ -536,7 +578,6 @@ void CmdParameters::check_action_detected() {
  * @return true if (single) action found, false otherwise
  */
 bool CmdParameters::scan_action(int argc, char const *argv[]) {
-  //m_p_action = nullptr;
   if(m_p_action != nullptr) {
     std::cout << "BOINK!" << std::endl;
     return true;

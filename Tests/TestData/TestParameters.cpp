@@ -83,12 +83,12 @@ bool TestParameters::handle_commandline(
 }
 
 
-CmdParameters::List &TestParameters::parameters() { return definition.parameters(); }
+CmdParameters::List const &TestParameters::parameters() { return definition.parameters(); }
 std::string TestParameters::get_errors() const    { return  definition.get_errors(); }
 
 
 void TestParameters::pass_params() {
-  CmdParameters::List &p = parameters();
+  auto &p = parameters();
 
   // TODO: perhaps use keys here instead.
   m_unsigned  = p[0]->get_int_value();

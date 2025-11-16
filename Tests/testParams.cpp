@@ -39,7 +39,7 @@ void single_param(TestParameters &params, char const *in_switch, int index = -1,
 // The actual unit tests
 //////////////////////////////////////////////////
 
-TEST_CASE("Test parameter definitions [params]") {
+TEST_CASE("Test parameter definitions [params][def]") {
 
   SUBCASE("null values not allowed") {
     // Reference value; this should succeed
@@ -95,7 +95,7 @@ TEST_CASE("Test parameter definitions [params]") {
 }
 
 
-TEST_CASE("Test multiple prefixes [params]") {
+TEST_CASE("Test multiple prefixes [params][prefix]") {
   SUBCASE("Null values not allowed") {
     // Reference implementation - this should succeed
     DefParameters a0 = {
@@ -152,7 +152,7 @@ TEST_CASE("Test multiple prefixes [params]") {
 }
 
 
-TEST_CASE("Test chained parameter definitions [params]") {
+TEST_CASE("Test chained parameter definitions [params][chain]") {
   SUBCASE("Chained global parameters should work") {
     DefParameters a0 = {
       { "Parent definition", "-1", NONE, "This switch is in the parent."}
@@ -256,7 +256,7 @@ TEST_CASE("Test chained parameter definitions [params]") {
 }
 
 
-TEST_CASE("Test Command Line parameters [params]") {
+TEST_CASE("Test Command Line parameters [params][cmd]") {
   cout_redirect redirect;
   TestParameters params;  // NOTE: putting this in global space causes a segfault
 
@@ -446,7 +446,7 @@ TEST_CASE("Test Command Line parameters [params]") {
   }
 
   SUBCASE("Indexed access of parameter values should return the same as keyed access") {
-    CmdParameters::List &p = params.parameters();
+    auto &p = params.parameters();
 
     const char *keys[] = {
       "Unsigned integer",
@@ -491,25 +491,19 @@ TEST_CASE("Test issues during usage [params][issues]") {
     REQUIRE(!p.has_errors());
   }
 
-
   // Given message should not be be displayed any more, instead a more relevant and specific message.
   SUBCASE("Check error 'takes a value, none specified' for -n12") {
-    cout_redirect redirect;
 
     CmdParameters p(base_params);
-    REQUIRE(!p.has_errors());
+		p.silent(true);
 
+    REQUIRE(!p.has_errors());
     char const *cmdline1[2] =  {"test", "-n=12"};
     REQUIRE(CmdParameters::ALL_IS_WELL == p.handle_commandline(2, cmdline1, false));
 
     char const *cmdline2[2] =  {"test", "-n12"};
-
-    // NOTE this displays an error on the console
-    // TODO perhaps add silent mode?
     REQUIRE(CmdParameters::EXIT_ERROR == p.handle_commandline(2, cmdline2, false));
-
     //INFO(p.get_errors());
-    REQUIRE(!Strings::contains(p.get_errors(), "(-n) takes a value, none specified"));
     REQUIRE(Strings::contains(p.get_errors(), "Unknown parameter '-n12'"));
   }
 }
@@ -645,4 +639,56 @@ std::string const expected =
   //std::cout << settings.get_usage() << std::endl;
   INFO(diff_strings(settings.get_usage(), expected));
   REQUIRE(settings.get_usage() == expected);
+}
+
+
+namespace {
+
+CmdParameters single_params {
+  "Blurb",
+
+  {
+		{
+      "A single-letter param",
+      { "-c", "-clong" },
+      NONE,
+      "This is a single-letter parameter'"
+  	}, {
+      "Another single-letter param",
+      { "-f", "-flong" },
+      NONE,
+      "This is another single-letter parameter"
+  	}, {
+      "Single-letter param with value",
+      { "-k", "-kvalue" },
+      INTEGER,
+      "This an single-letter parameter with a value"
+		}
+ }
+};
+
+}  // anon namespace
+
+
+TEST_CASE("Test combined single-letter params [params][single]") {
+	//std::cout << single_params.get_usage();
+	single_params.silent(true);
+
+  char const *cmdline1[2] =  {"test", "-c"};
+	REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(2, cmdline1, false));
+
+  char const *cmdline3[3] =  {"test", "-c", "-f"};  // Options separate
+	REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(3, cmdline3, false));
+
+  char const *cmdline4[3] =  {"test", "-cf", "-k=13"};  // Options combined
+	REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(3, cmdline4, false));
+
+  char const *cmdline2[2] =  {"test", "-n"};  // Unknown option
+	REQUIRE(CmdParameters::EXIT_ERROR == single_params.handle_commandline(2, cmdline2, false));
+
+  char const *cmdline5[2] =  {"test", "-cnf"};  // Options combined with unknown
+	REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline5, false));
+
+  char const *cmdline6[2] =  {"test", "-ckf"};  // Options combined with param requiring a value
+	REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline6, false));
 }

@@ -26,7 +26,7 @@ public:
   string output_file;
 
 
-  CmdParameters::List &parameters();
+  CmdParameters::List const &parameters();
   std::string get_errors() const;
 
 private:

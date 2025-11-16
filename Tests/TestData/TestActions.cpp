@@ -33,6 +33,6 @@ CmdParameters defined_actions {
       "-str=",
       STRING,
       "This is a string parameter specific to action 'Action3'"
-     }
-  }}
-}};
+		}}
+	}}
+};

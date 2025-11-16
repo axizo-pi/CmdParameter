@@ -30,6 +30,10 @@
 ## Release Notes
 
 ```
+20251115  v0.4.2
+		- Added combination of single-char parameters, eg. -cfn if c,f,n are separate parameters
+      The limitation is that the parameters do not have values.
+
 20210423  v0.4.1
     - Renamed field 'm_usage' to the more appropriate 'm_description' in CmdParameters
     - Added loop function to iterate of command line arguments
