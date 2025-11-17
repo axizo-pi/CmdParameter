@@ -2,7 +2,7 @@
 #define _CMDPARAMETER_SUPPORT_BASICS_H
 #include <string>
 
-// Following aken from project V3DLib
+// Following taken from project V3DLib
 #include "debug.h"
 
 inline std::string &operator<<(std::string &a, char const *str)        { a += str; return a; }
