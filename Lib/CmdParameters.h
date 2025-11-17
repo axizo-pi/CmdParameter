@@ -48,6 +48,8 @@ struct CmdParameters {
   std::string get_errors() const { return errors.str(); }
   bool has_errors() const { return !errors.str().empty(); }
 
+	bool scan_action(Args const &args);
+	bool has_help(Args const &args) const;
   ExitCode handle_commandline(int argc, char const *argv[], bool show_help_on_error = true);
 
 private:
@@ -73,7 +75,6 @@ private:
   std::string get_action_usage() const;
 
 	void show_help(Args const &args);
-	bool scan_action(Args const &args);
   bool handle_action(char const *curarg, Buf *errors = nullptr);
   bool handle_action_option(char const *curarg);
   void process_arg(char const *curarg);

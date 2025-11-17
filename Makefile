@@ -5,6 +5,12 @@
 #   obj-debug        - output debug info, using emulator
 #
 ###########################################################
+DEBUG=1
+
+ifeq ($(DEBUG), 1)
+$(info Using default value DEBUG=1)
+$(info To override, call make with `make (-e) `DEBUG=0`)
+endif
 
 EXAMPLES = \
 	Simple \

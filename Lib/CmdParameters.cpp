@@ -34,7 +34,7 @@ bool contains(string const &s, char c) {
 }
 
 
-void dump(Args const &args) {
+MAYBE_UNUSED void dump(Args const &args) {
 	for (auto const &w: args) {
 		cout << w << ", ";
 	}
@@ -61,7 +61,7 @@ bool process_option(List &parameters, string const &w) {
 	//
 	if (w[0] == '-' && w.length() > 2 && !contains(w, '=')) {
 		Args w_tmp;
-		for (int i = 1; i < w.length(); ++i) {  // Skip first, this is '-'
+		for (int i = 1; i < (int) w.length(); ++i) {  // Skip first, this is '-'
 			string arg("-");
 			char c = w[i];
 			arg += c;
@@ -82,7 +82,7 @@ bool process_option(List &parameters, string const &w) {
 		  }
 		}
 
-		if (count != w_tmp.size()) return false;
+		if (count != (int) w_tmp.size()) return false;
 
 		// All is well. Do the actual handling
 		bool ret = true;
@@ -167,25 +167,6 @@ std::string get_just_params(TypedParameter::List const &parameters, bool add_hel
   return ret;
 }
 
-
-/**
- * @brief Scan for help switch
- *
- * Note that -h combined with other single-letter params gets missed
- *
- * NOTE: Better if the CmdParameter for help handles this autonomously.
- * TODO investigate
- *
- * @return true if help switch found, false otherwise
- */
-bool has_help(Args const &args) {
-	for (auto w: args) {
-    if (w == "help" || w == "-h")  return true;
-	}
-
-  return false;
-}
-
 }  // anon namespace
 
 
@@ -261,6 +242,25 @@ void CmdParameters::output_errors(bool show_help_on_error) const {
   } else {
     cout << "  Use 'help' or '-h' to view options\n"  << endl;
   }
+}
+
+
+/**
+ * @brief Scan for help switch
+ *
+ * Note that -h combined with other single-letter params gets missed
+ *
+ * NOTE: Better if the CmdParameter for help handles this autonomously.
+ * TODO investigate
+ *
+ * @return true if help switch found, false otherwise
+ */
+bool CmdParameters::has_help(Args const &args) const {
+	for (auto w: args) {
+    if (w == "help" || w == "-h")  return true;
+	}
+
+  return false;
 }
 
 
