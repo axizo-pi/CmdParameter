@@ -62,7 +62,8 @@ struct TypedParameter {
   string get_string_value() const { return m_values.string_value; }
 
   void reset_values();
-  bool parse_param(const char *curarg, bool output_error = true);
+  bool match_param(string const &w) const;
+  bool parse_param(string const &w, bool output_error = true);
   virtual string usage() const;
   std::string prefixes_str() const;
   std::string defaults_str() const;

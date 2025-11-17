@@ -30,6 +30,10 @@
 ## Release Notes
 
 ```
+20251117  v0.4.3
+		- Started replacing char * params with string in CmdParameters, not done yet.
+		- Added prescan of combined single-letter param's before actually processing them
+
 20251115  v0.4.2
 		- Added combination of single-char parameters, eg. -cfn if c,f,n are separate parameters
       The limitation is that the parameters do not have values.

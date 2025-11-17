@@ -29,52 +29,78 @@ string pad(unsigned width, std::string const &str = "") {
 }
 
 
-bool process_option(List &parameters, char const *curarg) {
-	//cout << "curarg: " << curarg << endl << flush;
+bool contains(string const &s, char c) {
+	return (s.find(c) != std::string::npos);
+}
+
+
+void dump(Args const &args) {
+	for (auto const &w: args) {
+		cout << w << ", ";
+	}
+	cout << endl;
+}
+
+
+bool process_option(List &parameters, string const &w) {
 
   for (auto &item: parameters) {
     TypedParameter &param = *item;
-    if (param.parse_param(curarg)) {
+    if (param.parse_param(w)) {
 			//c.out << "Passed! curarg: " << curarg << endl << flush;
 			return true;
 		}
   }
 
+	//
 	// curargs might be a combined sequence of single-letter param's
 	// Test them separately, but they ALL should succeed.
 	//
 	// Technically, the final param could take a value. We don't
 	// handle this right now.
-	if (curarg[0] == '-' && strlen(curarg) > 2) {
-
-		int count = 0; // ALL values should match
-
-		for (int i = 1; i < strlen(curarg); ++i) {
-			if (curarg[i] == '=') return false;  // Don't bother with final param for now
-
+	//
+	if (w[0] == '-' && w.length() > 2 && !contains(w, '=')) {
+		Args w_tmp;
+		for (int i = 1; i < w.length(); ++i) {  // Skip first, this is '-'
 			string arg("-");
-			char c = curarg[i];
+			char c = w[i];
 			arg += c;
-    
-			//cout << "process_option handling arg: " << arg << "." << endl;
+			w_tmp.push_back(arg);
+		}
+		//dump(w_tmp);
 
-			bool found_it = false;
-	  	for (auto &item: parameters) {
+		// Prescan without handling
+		int count = 0; // ALL values should match
+		for (auto &w2: w_tmp) {
+  		for (auto &item: parameters) {
 		    TypedParameter &param = *item;
-		    if (param.parse_param(arg.c_str(), false)) {
-					found_it = true;
+		    if (param.match_param(w2)) {
+					//cout << "Passed! curarg: " << w2 << endl;
 					count++;
 					break;
 				}
 		  }
-
-			if (!found_it) {
-				return false;
-			}
-
 		}
 
-		return count == strlen(curarg) - 1;  // all single-char options pass here
+		if (count != w_tmp.size()) return false;
+
+		// All is well. Do the actual handling
+		bool ret = true;
+		for (auto &w2: w_tmp) {
+			bool did_it = false;
+
+  		for (auto &item: parameters) {
+		    TypedParameter &param = *item;
+		    if (param.parse_param(w2)) {      // Processing could fail, even if param itself is legal
+					did_it = true;
+					break;
+				}
+		  }
+
+			if (!did_it) ret = false;         // Continue loop to catch any other errors
+		}
+
+		return ret;
 	}
 
   return false;
@@ -142,16 +168,22 @@ std::string get_just_params(TypedParameter::List const &parameters, bool add_hel
 }
 
 
-void cmdline_each(int argc, char const *argv[], std::function<void(char const *)> f) {
-  int curindex = 0;
+/**
+ * @brief Scan for help switch
+ *
+ * Note that -h combined with other single-letter params gets missed
+ *
+ * NOTE: Better if the CmdParameter for help handles this autonomously.
+ * TODO investigate
+ *
+ * @return true if help switch found, false otherwise
+ */
+bool has_help(Args const &args) {
+	for (auto w: args) {
+    if (w == "help" || w == "-h")  return true;
+	}
 
-  while (true) {
-    curindex++;
-    if (curindex >= argc) break;
-    const char *curarg = argv[curindex];
-
-    f(curarg);
-  }
+  return false;
 }
 
 }  // anon namespace
@@ -240,16 +272,23 @@ void CmdParameters::output_errors(bool show_help_on_error) const {
  *         EXIT_ERROR    if should stop with errors
  */
 CmdParameters::ExitCode CmdParameters::handle_commandline(int argc, char const *argv[], bool show_help_on_error) {
+
+	Args args;
+	for (int i = 1; i < argc; ++i) {  // Skip first param, which is the program name
+		args.push_back(argv[i]);
+	}
+	//dump(args);
+
   bool do_continue = true;
 
   if (init()) {
     reset();
 
-    if (has_help(argc, argv)) {
-      show_help(argc, argv);
+    if (has_help(args)) {
+      show_help(args);
       do_continue = false;
     } else {
-      handle_commandline_intern(argc, argv);
+      handle_commandline_intern(args);
     }
   }
 
@@ -286,8 +325,8 @@ void CmdParameters::reset() {
 /**
  * Display help output
  */
-void CmdParameters::show_help(int argc, char const *argv[]) {
-  if (scan_action(argc, argv)) {
+void CmdParameters::show_help(Args const &args) {
+  if (scan_action(args)) {
     cout << get_action_usage();
   } else {
     cout << get_usage();
@@ -315,18 +354,12 @@ void CmdParameters::process_arg(char const *curarg) {
 
 /**
  * @brief Handle the command line and initialize files/dir's.
- *
- * If help detected, this will return true but there should
- * be no further processing. The caller should check with
- * `has_errors()` if execution can continue.
- *
- * @return true if execution can continue, false otherwise
  */
-void CmdParameters::handle_commandline_intern(int argc, char const *argv[]) {
+void CmdParameters::handle_commandline_intern(Args const &args) {
   try {
-    cmdline_each(argc, argv, [this] (char const *curarg) {
-      this->process_arg(curarg);
-    });
+		for (auto w: args) {
+      process_arg(w.c_str());
+		}
 
     check_unnamed_fields();
     check_action_detected();
@@ -463,27 +496,6 @@ std::string CmdParameters::get_params(TypedParameter::List const &parameters) co
 }
 
 
-/**
- * @brief Scan for help switch
- *
- * NOTE: Better if the CmdParameter for help handles this autonomously.
- * TODO investigate
- *
- * @return true if help switch found, false otherwise
- */
-bool CmdParameters::has_help(int argc, char const *argv[]) const {
-  bool ret = false;
-
-  cmdline_each(argc, argv, [&ret] (char const *curarg) {
-    if (string("help") == curarg || string("-h") == curarg) {
-      ret  = true;  // Note that loop continues after found
-    }
-  });
-
-  return ret;
-}
-
-
 ////////////////////////
 // Action handling
 ////////////////////////
@@ -577,15 +589,16 @@ void CmdParameters::check_action_detected() {
  *
  * @return true if (single) action found, false otherwise
  */
-bool CmdParameters::scan_action(int argc, char const *argv[]) {
+bool CmdParameters::scan_action(Args const &args) {
   if(m_p_action != nullptr) {
+		assert(false);
     std::cout << "BOINK!" << std::endl;
     return true;
   }
 
-  cmdline_each(argc, argv, [this] (char const *curarg) {
-    this->handle_action(curarg);  // Will set m_p_action if found
-  });
+	for (auto w: args) {
+    if (this->handle_action(w.c_str())) break;  // Will set m_p_action if found
+	}
 
 
   return (m_p_action != nullptr);

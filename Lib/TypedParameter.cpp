@@ -178,20 +178,20 @@ void TypedParameter::error(const string &msg) const {
 }
 
 
-bool TypedParameter::parse_param(const char *curarg, bool output_error) {
+bool TypedParameter::match_param(string const &w) const {
   bool found_prefix = false;
 
   for (auto &p : m_prefixes) {
-    if (Strings::starts_with(curarg, p)) {
+    if (Strings::starts_with(w.c_str(), p)) {
 			//cout << "parse_param match p: " << p << "; curarg: " << curarg << endl << flush;
 
       if (takes_value()) {
         // The only character allowed after is an equals sign
-        assert(strlen(curarg) > p.size());
-        if (curarg[p.size()] == '=') {
+        assert(w.length() > p.size());
+        if (w[p.size()] == '=') {
       		found_prefix = true;
 				}
-      } else if (p == curarg)  {  // If no parameter, match must be exact
+      } else if (p == w)  {  // If no parameter, match must be exact
      		found_prefix = true;
 			}
 
@@ -199,12 +199,15 @@ bool TypedParameter::parse_param(const char *curarg, bool output_error) {
     }
   }
 
-  if (!found_prefix) {
-		//cout << "Did not find prefix" << endl;
-    return false;
-  }
+	//cout << "Did not find prefix" << endl;
+  return found_prefix;
+}
 
-  string value = get_param(curarg);
+
+bool TypedParameter::parse_param(string const &w, bool output_error) {
+	if (!match_param(w)) return false;
+
+  string value = get_param(w.c_str());
 
   if (takes_value()) {
     if (value.empty() && output_error) {
@@ -216,7 +219,7 @@ bool TypedParameter::parse_param(const char *curarg, bool output_error) {
       }
     }
   } else {
-    if ((Strings::contains(curarg, "=") || !value.empty()) && output_error) {
+    if ((Strings::contains(w.c_str(), "=") || !value.empty()) && output_error) {
      error("has value specified, shouldn't have one.");
     }
   }

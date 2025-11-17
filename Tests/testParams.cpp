@@ -674,6 +674,9 @@ TEST_CASE("Test combined single-letter params [params][single]") {
 	//std::cout << single_params.get_usage();
 	single_params.silent(true);
 
+  //char const *cmdline0[2] =  {"test", "-h"};
+	//REQUIRE(CmdParameters::EXIT_NO_ERROR == single_params.handle_commandline(2, cmdline0, false));
+
   char const *cmdline1[2] =  {"test", "-c"};
 	REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(2, cmdline1, false));
 
@@ -691,4 +694,16 @@ TEST_CASE("Test combined single-letter params [params][single]") {
 
   char const *cmdline6[2] =  {"test", "-ckf"};  // Options combined with param requiring a value
 	REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline6, false));
+
+  char const *cmdline7[4] =  {"test", "-c", "-f", "-c"};  // Options repeated
+	REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(4, cmdline7, false));
+
+  char const *cmdline8[2] =  {"test", "-cfc"};  // Options repeated in single param
+	REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(2, cmdline8, false));
+
+  char const *cmdline9[2] =  {"test", "-cfcppjpo"};  //  first 2 valid, rest garbage
+	REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline9, false));
+
+  char const *cmdline10[2] =  {"test", "-cf=abc"};  //  first 2 valid, '=' not allowed 
+	REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline10, false));
 }

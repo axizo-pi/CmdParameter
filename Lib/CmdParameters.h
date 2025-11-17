@@ -7,10 +7,14 @@
 #include "Types/NoneParameter.h"
 #include "CmdValidation.h"
 
+using Args = std::vector<std::string>;
 
+/**
+ * TODO: replace all char * param's with strings
+ */
 struct CmdParameters {
   using List = TypedParameter::List;
-  using Buf  = std::ostringstream;  // because it looks ugly in var declarations
+  using Buf  = std::ostringstream;        // because it looks ugly in var declarations
 
   enum ExitCode {
     ALL_IS_WELL   = -2,
@@ -46,9 +50,6 @@ struct CmdParameters {
 
   ExitCode handle_commandline(int argc, char const *argv[], bool show_help_on_error = true);
 
-  bool has_help(int argc, char const *argv[]) const;
-  bool scan_action(int argc, char const *argv[]);
-
 private:
   const char          *m_description  = nullptr;
   DefParameters        global_parameters;
@@ -71,11 +72,12 @@ private:
   std::string get_actions() const;
   std::string get_action_usage() const;
 
-  void show_help(int argc, char const *argv[]);
+	void show_help(Args const &args);
+	bool scan_action(Args const &args);
   bool handle_action(char const *curarg, Buf *errors = nullptr);
   bool handle_action_option(char const *curarg);
   void process_arg(char const *curarg);
-  void handle_commandline_intern(int argc, char const *argv[]);
+  void handle_commandline_intern(Args const &args);
   void check_unnamed_fields();
   void check_action_detected();
 
