@@ -167,25 +167,6 @@ std::string get_just_params(TypedParameter::List const &parameters, bool add_hel
   return ret;
 }
 
-
-/**
- * @brief Scan for help switch
- *
- * Note that -h combined with other single-letter params gets missed
- *
- * NOTE: Better if the CmdParameter for help handles this autonomously.
- * TODO investigate
- *
- * @return true if help switch found, false otherwise
- */
-bool has_help(Args const &args) {
-	for (auto w: args) {
-    if (w == "help" || w == "-h")  return true;
-	}
-
-  return false;
-}
-
 }  // anon namespace
 
 
@@ -227,6 +208,25 @@ CmdParameters::CmdParameters(
   global_parameters(global_params),
   actions(in_actions) {
   init(parent);
+}
+
+
+/**
+ * @brief Scan for help switch
+ *
+ * Note that -h combined with other single-letter params gets missed
+ *
+ * NOTE: Better if the CmdParameter for help handles this autonomously.
+ * TODO investigate
+ *
+ * @return true if help switch found, false otherwise
+ */
+bool CmdParameters::has_help(Args const &args) const {
+	for (auto w: args) {
+    if (w == "help" || w == "-h")  return true;
+	}
+
+  return false;
 }
 
 
