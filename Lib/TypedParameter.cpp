@@ -183,12 +183,11 @@ bool TypedParameter::match_param(string const &w) const {
 
   for (auto &p : m_prefixes) {
     if (Strings::starts_with(w.c_str(), p)) {
-			//cout << "parse_param match p: " << p << "; curarg: " << curarg << endl << flush;
+			//cout << "parse_param match p: " << p << "; w: " << w << endl << flush;
 
       if (takes_value()) {
         // The only character allowed after is an equals sign
-        assert(w.length() > p.size());
-        if (w[p.size()] == '=') {
+        if (w.length() > p.size() && w[p.size()] == '=') {
       		found_prefix = true;
 				}
       } else if (p == w)  {  // If no parameter, match must be exact
