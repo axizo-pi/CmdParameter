@@ -265,25 +265,6 @@ void CmdParameters::output_errors(bool show_help_on_error) const {
 
 
 /**
- * @brief Scan for help switch
- *
- * Note that -h combined with other single-letter params gets missed
- *
- * NOTE: Better if the CmdParameter for help handles this autonomously.
- * TODO investigate
- *
- * @return true if help switch found, false otherwise
- */
-bool CmdParameters::has_help(Args const &args) const {
-	for (auto w: args) {
-    if (w == "help" || w == "-h")  return true;
-	}
-
-  return false;
-}
-
-
-/**
  * @brief Override of `handle_commandline()` which also does `init()`.
  *
  * @return ALL_IS_WELL   if all is well,

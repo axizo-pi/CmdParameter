@@ -51,8 +51,6 @@ struct CmdParameters {
 	bool scan_action(Args const &args);
 	bool has_help(Args const &args) const;
   ExitCode handle_commandline(int argc, char const *argv[], bool show_help_on_error = true);
-	bool scan_action(Args const &args);
-  bool has_help(Args const &args) const;
 
 private:
   const char          *m_description  = nullptr;
