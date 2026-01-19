@@ -7,6 +7,7 @@
 #include "OptionParameter.h"
 #include "UnsignedIntParameter.h"
 #include "PositiveIntParameter.h"
+#include "FloatParameter.h"
 #include "PositiveFloatParameter.h"
 #include "StringParameter.h"
 #include "UnnamedParameter.h"
@@ -22,6 +23,7 @@ TypedParameter *DefParameter_factory(DefParameter &item) {
   case OPTION:           p = new OptionParameter(item);        break;
   case UNSIGNED_INTEGER: p = new UnsignedIntParameter(item);   break;
   case POSITIVE_INTEGER: p = new PositiveIntParameter(item);   break;
+  case FLOAT:            p = new FloatParameter(item);         break;
   case POSITIVE_FLOAT:   p = new PositiveFloatParameter(item); break;
   case STRING:           p = new StringParameter(item);        break;
   case UNNAMED:          p = new UnnamedParameter(item);       break;

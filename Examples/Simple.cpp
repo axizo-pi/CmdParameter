@@ -1,6 +1,3 @@
-/**
- * Example with one integer switch on the command line
- */
 #include <iostream>
 #include "../Lib/CmdParameters.h"
 
@@ -8,12 +5,19 @@ using namespace std;
 
 
 CmdParameters params = {
-  "Simple test with single integer command line parameters\n",
+  "Test with simple command line parameters\n",
   {{
     "An integer value",
-    "-int=",
+		{"-i=", "-int="},
     INTEGER,
-    "This value can be any integer"
+    "This value can be any integer",
+		1
+  },{
+    "A float value",
+		{"-f=", "-float="},
+    FLOAT,
+    "This value can be any float",
+		-1.1f
   }}
 };
 
@@ -24,7 +28,10 @@ int main(int argc, const char *argv[]) {
     return ret;
   }
 
-  cout << "switch value: " << params.parameters()[0]->get_int_value() << endl;
+  cout << "Switch values: "
+	 	 	 << params.parameters()[0]->get_int_value()   << ", "
+       << params.parameters()[1]->get_float_value()
+			 << endl;
 
   return 0;
 }

@@ -90,6 +90,7 @@ EXPORT_OBJ := \
 	Types/UnsignedIntParameter \
 	Types/PositiveIntParameter \
 	Types/PositiveFloatParameter \
+	Types/FloatParameter \
 	Support/Strings \
 	DefAction \
 	CmdParameters \

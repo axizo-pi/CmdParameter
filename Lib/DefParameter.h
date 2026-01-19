@@ -22,49 +22,13 @@ struct DefParameter {
   static const int   INT_NOT_SET;
   static const float FLOAT_NOT_SET;
 
-  DefParameter(
-    const char *in_name,
-    const char *in_prefix,
-    ParamType in_param_type,
-    const char *in_usage
-  );
-
-  DefParameter(
-    const char *in_name,
-    Prefixes    in_prefixes,
-    ParamType in_param_type,
-    const char *in_usage
-  );
-
-  DefParameter(
-    const char *in_name,
-    const char *in_prefix,
-    ParamType   in_param_type,
-    const char *in_usage,
-    int default_value
-  );
-
-  DefParameter(
-    const char *in_name,
-    Prefixes    in_prefixes,
-    ParamType   in_param_type,
-    const char *in_usage,
-    int default_value
-  );
-
-  DefParameter(
-    const char *in_name,
-    const char *in_prefix,
-    Options const &options,  // implies type integer
-    const char *in_usage
-  );
-
-  DefParameter(
-    const char *in_name,
-    Prefixes    in_prefixes,
-    Options const &options,  // implies type integer
-    const char *in_usage
-  );
+  DefParameter(const char *in_name, const char *in_prefix,   ParamType in_param_type, const char *in_usage);
+  DefParameter(const char *in_name, Prefixes    in_prefixes, ParamType in_param_type, const char *in_usage);
+  DefParameter(const char *in_name, const char *in_prefix,   ParamType in_param_type, const char *in_usage, int default_value);
+  DefParameter(const char *in_name, Prefixes    in_prefixes, ParamType in_param_type, const char *in_usage, int default_value);
+  DefParameter(const char *in_name, Prefixes    in_prefixes, ParamType in_param_type, const char *in_usage, float default_value);
+  DefParameter(const char *in_name, const char *in_prefix,   Options const  &options, const char *in_usage); // options imply type integer
+  DefParameter(const char *in_name, Prefixes    in_prefixes, Options const  &options, const char *in_usage); // options imply type integer
 
   const char *name;                    //!> The name or short description of the parameter.
                                        //!>  This value is used as label and must be unique

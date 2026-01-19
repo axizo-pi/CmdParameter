@@ -78,6 +78,23 @@ DefParameter::DefParameter(
 
 DefParameter::DefParameter(
   const char *in_name,
+  Prefixes    in_prefixes,
+  ParamType   in_param_type,
+  const char *in_usage,
+  float default_value) :
+  name(in_name),
+  prefixes(in_prefixes),
+  param_type(in_param_type),
+  usage(in_usage),
+  float_default(default_value)
+{
+  assert(in_prefixes.size() >= 2);
+  handle_defaults();
+}
+
+
+DefParameter::DefParameter(
+  const char *in_name,
   const char *in_prefix,
   Options const &options,
   const char *in_usage) :
@@ -123,6 +140,7 @@ bool DefParameter::is_int_type() const {
 
 bool DefParameter::is_float_type() const {
   switch(param_type) {
+  case FLOAT:
   case POSITIVE_FLOAT:
     return true;
 
@@ -146,11 +164,19 @@ void DefParameter::handle_defaults() {
     }
   break;
 
+  case FLOAT:
+    if (std::isnan(float_default)) {
+      float_default = 0.0f;
+    }
+  break;
+
   case POSITIVE_FLOAT:
     if (std::isnan(float_default)) {
       float_default = 1.0f;
     }
+
   break;
+
   default:
     // do nothing
     break;

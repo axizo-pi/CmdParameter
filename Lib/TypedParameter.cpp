@@ -271,8 +271,10 @@ float TypedParameter::get_float_value(const string &param) {
   value = (float) strtod(str, &end);
 
   if (end == str || *end != '\0') {
-    string msg(def_param.name);
-    throw Exception(msg + " value not a float.");
+    string msg("Parameter '");
+    msg += def_param.name;
+    msg += "' ";
+    throw Exception(msg + "is not a float.");
   }
 
   return value;
