@@ -1,6 +1,7 @@
 #ifndef _CMDPARAMETER_SUPPORT_BASICS_H
 #define _CMDPARAMETER_SUPPORT_BASICS_H
 #include <string>
+#include <cstdint>
 
 // Following taken from project V3DLib
 #include "debug.h"
