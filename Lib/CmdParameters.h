@@ -26,11 +26,11 @@ struct CmdParameters {
 
   CmdParameters() = default;
   CmdParameters(CmdParameters const &rhs);
-  CmdParameters(char const *in_description, DefParameters global_params, CmdParameters *parent = nullptr);
-  CmdParameters(char const *in_description, DefActions in_actions, CmdParameters *parent = nullptr);
+  CmdParameters(std::string const &in_description, DefParameters global_params, CmdParameters *parent = nullptr);
+  CmdParameters(std::string const &in_description, DefActions in_actions, CmdParameters *parent = nullptr);
 
   CmdParameters(
-    char const *in_description,
+    std::string const &in_description,
     DefActions in_actions,
     DefParameters global_params,
     CmdParameters *parent = nullptr);
@@ -39,7 +39,8 @@ struct CmdParameters {
   bool add(CmdParameters const &rhs);
   bool validate();
   void silent(bool val) { m_silent = val; }
-  std::string description() const { return m_description; }
+  void description(std::string const &description) { m_description = description; }
+  std::string const &description() const { return m_description; }
   std::string get_usage() const;
   std::string params_usage(bool add_help) const;
   TypedParameter::List const &parameters() const { return m_parameters; }
@@ -53,7 +54,7 @@ struct CmdParameters {
   ExitCode handle_commandline(int argc, char const *argv[], bool show_help_on_error = true);
 
 private:
-  const char          *m_description  = nullptr;
+  std::string          m_description;
   DefParameters        global_parameters;
   TypedParameter::List m_parameters;
   bool                 m_done_init    = false;
