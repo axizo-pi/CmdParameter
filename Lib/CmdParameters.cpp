@@ -185,14 +185,14 @@ CmdParameters::CmdParameters(CmdParameters const &rhs) : m_description(rhs.m_des
   init(&rhs);
 }
 
-CmdParameters::CmdParameters(char const *in_description, DefParameters global_params, CmdParameters *parent) :
+CmdParameters::CmdParameters(std::string const &in_description, DefParameters global_params, CmdParameters *parent) :
   m_description(in_description),
   global_parameters(global_params) {
   init(parent);
 }
 
 
-CmdParameters::CmdParameters(char const *in_description, DefActions in_actions, CmdParameters *parent) :
+CmdParameters::CmdParameters(std::string const &in_description, DefActions in_actions, CmdParameters *parent) :
   m_description(in_description),
   actions(in_actions) {
   init(parent);
@@ -200,7 +200,7 @@ CmdParameters::CmdParameters(char const *in_description, DefActions in_actions, 
 
 
 CmdParameters::CmdParameters(
-  char const *in_description,
+  std::string const &in_description,
   DefActions in_actions,
   DefParameters global_params,
   CmdParameters *parent) :
@@ -401,7 +401,7 @@ bool CmdParameters::add_intern(CmdParameters const &rhs) {
     return false;
   }
 
-  if (m_description == nullptr) {
+  if (m_description.empty()) {
     m_description = rhs.m_description;
   }
 
@@ -455,7 +455,7 @@ bool CmdParameters::init_params() {
 bool CmdParameters::validate() {
   if (m_validated) return true;
 
-  if (m_description == nullptr) {
+  if (m_description.empty()) {
     m_validation.add_error("No description passed");
   }
 

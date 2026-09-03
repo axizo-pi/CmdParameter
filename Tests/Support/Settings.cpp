@@ -58,7 +58,7 @@ CmdParameters base_params = {
 
 
 CmdParameters numqpu_params = {
-  "",
+  "Num QPU params",
   {{
     "Num QPU's",
     "-n=",
