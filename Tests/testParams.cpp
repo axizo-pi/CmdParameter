@@ -64,6 +64,24 @@ CmdParameters single_params {
  }
 };
 
+auto const ALL_IS_WELL = CmdParameters::ALL_IS_WELL;
+auto const EXIT_ERROR  = CmdParameters::EXIT_ERROR;
+
+using Cmd = std::vector<const char *>; // Name short for 'Commandline'.
+
+bool check(Cmd &cmdline){
+  auto ret = single_params.handle_commandline((int) cmdline.size(), cmdline.data(), false);
+  return (CmdParameters::EXIT_NO_ERROR == ret);
+}
+
+
+/**
+ * @brief Check with return value (exit code)
+ */
+CmdParameters::ExitCode checkr(Cmd &cmdline) {
+   return single_params.handle_commandline((int) cmdline.size(), cmdline.data(), false);
+	};
+
 }  // anon namespace
 
 
@@ -161,7 +179,6 @@ TEST_CASE("Test multiple prefixes [params][prefix]") {
       { "prefix1", { "-switch1", "-switch2", "-switch1" }, NONE, "Long blurb."}
     };
     CmdParameters c1("blurb", a1);
-    //c1.show_errors(true);
     REQUIRE(!c1.init());
   }
 
@@ -199,8 +216,6 @@ TEST_CASE("Test chained parameter definitions [params][chain]") {
     INFO(c1.get_errors());
     REQUIRE(!c1.has_errors());
 
-    //c1.show_usage();
-
     int argc1 = 2;
     const char *argv1[] = { PROG, "-1"};
     REQUIRE(c0.handle_commandline(argc1, argv1, false) == CmdParameters::ALL_IS_WELL);
@@ -236,7 +251,6 @@ TEST_CASE("Test chained parameter definitions [params][chain]") {
     c1.silent(true);
     // Should fail due to double definition
     REQUIRE(!c1.init());
-    //printf("Chained double definition:\n%s\n", c1.get_errors().c_str());
 
     // Now a double definition - should fail
     // Both options should be available
@@ -279,7 +293,6 @@ TEST_CASE("Test chained parameter definitions [params][chain]") {
       REQUIRE(false);
     }
 
-    //c0.show_usage();
     REQUIRE(c0.handle_commandline(argc, argv2, false) == CmdParameters::ALL_IS_WELL);  // -2 now present
 
     // Doubles in added parameters should not be accepted
@@ -464,9 +477,9 @@ TEST_CASE("Test Command Line parameters [params][cmd]") {
 
   SUBCASE("Empty prefixes should not be allowed") {
     CmdParameters c = {
-      "blurb", {  // Usage
-      {  "Name", "", UNNAMED,  "" },
-    }};
+      "blurb", // Usage
+			{{  "Name", "", UNNAMED,  "" }},
+    };
 
     REQUIRE(!c.init());
   }
@@ -660,7 +673,6 @@ std::string const expected =
   int argc = 1;
   char const *argv[1] = { "Mandelbrot" };
   REQUIRE(settings.init(argc, argv));
-  //std::cout << settings.get_usage() << std::endl;
   INFO(diff_strings(settings.get_usage(), expected));
   REQUIRE(settings.get_usage() == expected);
 }
@@ -669,79 +681,80 @@ std::string const expected =
 TEST_CASE("Test combined single-letter params [params][combined]") {
   single_params.silent(true);
 
-  char const *cmdline1[2] =  {"test", "-c"};
-  REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(2, cmdline1, false));
+	Cmd cmdline1 = {"test", "-c"};
+  REQUIRE(ALL_IS_WELL == checkr(cmdline1));
 
 	// Options separate
-  char const *cmdline3[3] =  {"test", "-c", "-f"};
-  REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(3, cmdline3, false));
+  Cmd cmdline2 =  {"test", "-c", "-f"};
+  REQUIRE(ALL_IS_WELL == checkr(cmdline2));
 
 	// Options combined
-  char const *cmdline4[3] =  {"test", "-cf", "-k=13"};
-  auto ret =  single_params.handle_commandline(3, cmdline4, false);
-  INFO(single_params.get_errors());
-  REQUIRE(CmdParameters::ALL_IS_WELL == ret);
+  Cmd cmdline3 =  {"test", "-cf", "-k=13"};
+  REQUIRE(ALL_IS_WELL == checkr(cmdline3));
 
 	// Unknown option
-  char const *cmdline2[2] =  {"test", "-n"};
-  REQUIRE(CmdParameters::EXIT_ERROR == single_params.handle_commandline(2, cmdline2, false));
+  Cmd cmdline4 =  {"test", "-n"};
+  REQUIRE(EXIT_ERROR == checkr(cmdline4));
 
 	// Options combined with unknown
-  char const *cmdline5[2] =  {"test", "-cnf"};
-  REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline5, false));
+  Cmd cmdline5 =  {"test", "-cnf"};
+  REQUIRE(ALL_IS_WELL != checkr(cmdline5));
 
 	// Options combined with param requiring a value
-  char const *cmdline6[2] =  {"test", "-ckf"};
-  REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline6, false));
+  Cmd cmdline6 =  {"test", "-ckf"};
+  REQUIRE(ALL_IS_WELL != checkr(cmdline6));
 
 	// Options repeated
-  char const *cmdline7[4] =  {"test", "-c", "-f", "-c"};
-  REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(4, cmdline7, false));
+  Cmd cmdline7 =  {"test", "-c", "-f", "-c"};
+  REQUIRE(ALL_IS_WELL == checkr(cmdline7));
 
 	// Options repeated in single param
-  char const *cmdline8[2] =  {"test", "-cfc"};
-  REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(2, cmdline8, false));
+  Cmd cmdline8 =  {"test", "-cfc"};
+  REQUIRE(ALL_IS_WELL == checkr(cmdline8));
 
-	//  first 2 valid, rest garbage
-  char const *cmdline9[2] =  {"test", "-cfcppjpo"};
-  REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline9, false));
+	// first 2 valid, rest garbage
+  Cmd cmdline9 =  {"test", "-cfcppjpo"};
+  REQUIRE(ALL_IS_WELL != checkr(cmdline9));
 
 	// first 2 valid, '=' not allowed 
-  char const *cmdline10[2] =  {"test", "-cf=abc"};
-  REQUIRE(CmdParameters::ALL_IS_WELL != single_params.handle_commandline(2, cmdline10, false));
+  Cmd cmdline10 =  {"test", "-cf=abc"};
+  REQUIRE(ALL_IS_WELL != checkr(cmdline10));
 
 	// Groups of valid parameters 
-  char const *cmdline11[3] =  {"test", "-cf", "-cx"};
-  REQUIRE(CmdParameters::ALL_IS_WELL == single_params.handle_commandline(3, cmdline11, false));
+  Cmd cmdline11 =  {"test", "-cf", "-cx"};
+  REQUIRE(ALL_IS_WELL == checkr(cmdline11));
 }
 
 
 TEST_CASE("Test help switch with combined params [params][combined][help]") {
   cout_redirect redirect;
-	using Args = std::vector<const char *>;
-
-	auto check = [&] (Args &cmdline) ->bool {
-   auto ret = single_params.handle_commandline((int) cmdline.size(), cmdline.data(), false);
-   return (CmdParameters::EXIT_NO_ERROR == ret);
-	};
 
 	// Legal options with help 
-	Args cmdline1 = {"test", "-cfh", "-x"};
+	Cmd cmdline1 = {"test", "-cfh", "-x"};
 	REQUIRE(check(cmdline1));
-/*
-	// Garbage options with help 
-	Args cmdline1a = {"test", "-silly=123", "-cf", "-xh", "-garbage=\"some stupid undefined param\""};
-	REQUIRE(check(cmdline1a));
-*/
+
 	//
 	// Help param in different locations
 	//
-  Args cmdline2 =  {"test", "help", "-cfx"};
+  Cmd cmdline2 =  {"test", "help", "-cfx"};
 	REQUIRE(check(cmdline2));
 
-  Args cmdline3 =  {"test", "-cfx", "help"};
+  Cmd cmdline3 =  {"test", "-cfx", "help"};
 	REQUIRE(check(cmdline3));
 
-  Args cmdline4 =  {"test", "-cfx", "-h"};
+  Cmd cmdline4 =  {"test", "-cfx", "-h"};
 	REQUIRE(check(cmdline4));
+}
+
+
+TEST_CASE("Test pathological situations [params][garbage]") {
+  cout_redirect redirect;
+
+	// Pathological test involving garbage options with help 
+	Cmd cmdline1 = {"test", "-silly=123", "-cf", "-xh", "-garbage=\"some stupid undefined param\""};
+	REQUIRE(check(cmdline1));
+
+	// Same thing without help should return error
+	Cmd cmdline2 = {"test", "-silly=123", "-cf", "-x", "-garbage=\"some stupid undefined param\""};
+	REQUIRE(EXIT_ERROR == checkr(cmdline2));
 }
