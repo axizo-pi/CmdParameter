@@ -1,7 +1,7 @@
 CmdParameter
 ============
 
-Version 0.4.5
+Version 0.4.6
 
 `CmdParameter` is a library for handling command line parameters in C++.
 
@@ -80,9 +80,13 @@ switch value: 42
 
 -----
 
+## Recent Changes
+
+- v0.4.6: Refactored combined param handling into class `Args`.
+
+-----
+
 ## TODO
 
 - Make an example which contains **ALL** options types and combinations with actions
   Put the struct and the help output in this README.
-- Allow concatenated short options (no parameters), e.g. `-AaBb`
-- `make test` should build DEBUG version of code

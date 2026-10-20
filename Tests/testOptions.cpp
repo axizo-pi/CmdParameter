@@ -1,6 +1,9 @@
 #include "doctest.h"
 #include "../Lib/CmdParameters.h"
 #include "Support/debug.h"
+#include <iostream>  // cout
+
+using namespace std;
 
 namespace {
 
@@ -26,7 +29,6 @@ TEST_CASE("Fixed options for param [options]") {
       PROG
     };
 
-    //breakpoint
     REQUIRE(CmdParameters::ALL_IS_WELL == no_actions.handle_commandline(argc1, argv1, false));
     REQUIRE(no_actions.parameters()[0]->get_int_value() == 0);
     REQUIRE(no_actions.parameters()[0]->get_string_value() == "opt1");

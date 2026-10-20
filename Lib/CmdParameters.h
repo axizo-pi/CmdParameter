@@ -7,11 +7,38 @@
 #include "Types/NoneParameter.h"
 #include "CmdValidation.h"
 
-using Args = std::vector<std::string>;
 
 /**
- * TODO: replace all char * param's with strings
+ * @brief Container for command line arguments.
+ *
+ * This does initial parameter check and handles combined parameters. 
+ *
+ * Combined parameters are multiple single-character parameters
+ * combined in a single switch, eg. `-xsh`.
+ *
+ * Perhaps **TODO:** Enable 'h' for combined parameters of actions.
  */
+class Args : public std::vector<std::string> {
+public:
+  using List = TypedParameter::List;
+
+  Args() = default;
+  Args(int argc, char const *argv[]);
+  Args(std::string const &w);
+
+  bool check(List const &parameters, DefActions const &actions, bool do_throw = true);
+  bool handle(List &parameters);
+  bool has_help() const;
+  std::string dump();
+
+private:
+  bool check(List const &parameters, std::string const &w) const;
+  int check(List const &parameters, int current) const;
+  Args &operator<<(Args const &rhs);
+  bool is_help(std::string const &w) const;
+};
+
+
 struct CmdParameters {
   using List = TypedParameter::List;
   using Buf  = std::ostringstream;        // because it looks ugly in var declarations
@@ -26,8 +53,16 @@ struct CmdParameters {
 
   CmdParameters() = default;
   CmdParameters(CmdParameters const &rhs);
-  CmdParameters(std::string const &in_description, DefParameters global_params, CmdParameters *parent = nullptr);
-  CmdParameters(std::string const &in_description, DefActions in_actions, CmdParameters *parent = nullptr);
+
+  CmdParameters(
+    std::string const &in_description,
+    DefParameters global_params,
+    CmdParameters *parent = nullptr);
+
+  CmdParameters(
+    std::string const &in_description,
+    DefActions in_actions,
+    CmdParameters *parent = nullptr);
 
   CmdParameters(
     std::string const &in_description,
@@ -49,8 +84,7 @@ struct CmdParameters {
   std::string get_errors() const { return errors.str(); }
   bool has_errors() const { return !errors.str().empty(); }
 
-	bool scan_action(Args const &args);
-	bool has_help(Args const &args) const;
+  bool scan_action(Args const &args);
   ExitCode handle_commandline(int argc, char const *argv[], bool show_help_on_error = true);
 
 private:
@@ -75,11 +109,11 @@ private:
   std::string get_actions() const;
   std::string get_action_usage() const;
 
-	void show_help(Args const &args);
+  void show_help(Args const &args);
   bool handle_action(char const *curarg, Buf *errors = nullptr);
   bool handle_action_option(char const *curarg);
   void process_arg(char const *curarg);
-  void handle_commandline_intern(Args const &args);
+  void handle_commandline_intern(Args &args);
   void check_unnamed_fields();
   void check_action_detected();
 

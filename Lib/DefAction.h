@@ -1,8 +1,8 @@
 #ifndef DEFACTION_H
 #define DEFACTION_H
-#include <vector>
 #include "TypedParameter.h"
 #include "DefParameter.h"
+#include <vector>
 
 
 class DefAction {
