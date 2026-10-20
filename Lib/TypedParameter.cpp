@@ -178,33 +178,35 @@ void TypedParameter::error(const string &msg) const {
 }
 
 
+/**
+ * @brief Check syntax and presence of passed in parameter.
+ *
+ * This is a check only, the parameter is not handled.
+ */
 bool TypedParameter::match_param(string const &w) const {
   bool found_prefix = false;
 
   for (auto &p : m_prefixes) {
     if (Strings::starts_with(w.c_str(), p)) {
-			//cout << "parse_param match p: " << p << "; w: " << w << endl << flush;
-
       if (takes_value()) {
         // The only character allowed after is an equals sign
         if (w.length() > p.size() && w[p.size()] == '=') {
-      		found_prefix = true;
-				}
+          found_prefix = true;
+        }
       } else if (p == w)  {  // If no parameter, match must be exact
-     		found_prefix = true;
-			}
+         found_prefix = true;
+      }
 
-			if (found_prefix) break;
+      if (found_prefix) break;
     }
   }
 
-	//cout << "Did not find prefix" << endl;
   return found_prefix;
 }
 
 
 bool TypedParameter::parse_param(string const &w, bool output_error) {
-	if (!match_param(w)) return false;
+  if (!match_param(w)) return false;
 
   string value = get_param(w.c_str());
 

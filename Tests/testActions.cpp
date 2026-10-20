@@ -25,7 +25,9 @@ TEST_CASE("Test bad action definitions actions]") {
 TEST_CASE("Test good action command lines [actions]") {
   int argc1 = 3;
   const char *argv1[] = { "Test", "action1", "-unsigned=51" };
-  REQUIRE(CmdParameters::ALL_IS_WELL == defined_actions.handle_commandline(argc1, argv1, false));
+  auto ret = defined_actions.handle_commandline(argc1, argv1, false);
+  INFO(defined_actions.get_errors());
+  REQUIRE(CmdParameters::ALL_IS_WELL == ret);
 
   int argc2 = 2;
   const char *argv2[] = { "Test", "action2" };

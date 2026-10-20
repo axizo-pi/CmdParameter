@@ -31,7 +31,6 @@ struct TypedParameter {
     TypedParameter const *operator[] (const char *key) const;
 
     bool process_unnamed(const char *curarg);
-
     void reset_values();
   };
 
