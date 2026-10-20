@@ -92,6 +92,7 @@ EXPORT_OBJ := \
 	Types/PositiveFloatParameter \
 	Types/FloatParameter \
 	Support/Strings \
+	Args \
 	DefAction \
 	CmdParameters \
 	DefParameter \
